@@ -59,11 +59,11 @@ ro.qualcomm.bluetooth.ftp=true
 ## system prop for requesting Master role in incoming Bluetooth connection.
 ro.bluetooth.request.master=true
 ## system property to enforce Phone Mode view
-ro.screen.layout=normal
+#ro.screen.layout=normal
 ## LCD
 ro.sf.lcd_density=240
 ## System prop for disabling the meta data mode for encoder
-debug.camcorder.disablemeta=0
+#debug.camcorder.disablemeta=0
 ## Simulate sdcard on /data/media
 persist.fuse_sdcard=false
 ## Turn off tiled rendering
@@ -71,4 +71,8 @@ debug.enabletr=false
 ## System prop for using landscape preview layout in camera
 debug.camera.landscape=true
 ## System prop for capping scroll velocity
-ro.max.fling_velocity=4000
+windowsmgr.max_events_per_sec=150
+ro.max.fling_velocity=12000
+ro.min.fling_velocity=8000
+ro.product.multi_touch_enabled=true
+ro.product.max_num_touch = 2
