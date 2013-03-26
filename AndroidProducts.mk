@@ -1,2 +1,2 @@
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/device_cocktail.mk
+    $(LOCAL_DIR)/full_cocktail.mk
