@@ -6,18 +6,27 @@ $(call inherit-product, device/common/gps/gps_us_supl.mk)
 # Proprietary bits and pieces
 $(call inherit-product-if-exists, device/alcatel/cocktail/vendor_cocktail.mk)
 
-# DEVICE_PACKAGE_OVERLAYS += device/alcatel/cocktail/overlay
+DEVICE_PACKAGE_OVERLAYS += device/alcatel/cocktail/overlay
 
 # Qualcomm scripts
 PRODUCT_COPY_FILES += \
-    device/alcatel/cocktail/prebuilt/init.qcom.post_boot.sh:system/etc/init.qcom.post_boot.sh
+    device/alcatel/cocktail/prebuilt/init.qcom.sdio.sh:system/etc/init.qcom.sdio.sh
 
-# init.rc and ueventd.rc
+# CNE config
 PRODUCT_COPY_FILES += \
-    device/alcatel/cocktail/init.rc:root/init.rc \
-    device/alcatel/cocktail/init.cocktail.rc:root/init.cocktail.rc \
-    device/alcatel/cocktail/init.cocktail.usb.rc:root/init.cocktail.usb.rc \
-    device/alcatel/cocktail/ueventd.cocktail.rc:root/ueventd.cocktail.rc
+   device/alcatel/cocktail/prebuilt/OperatorPolicy.xml:system/etc/OperatorPolicy.xml \
+   device/alcatel/cocktail/prebuilt/UserPolicy.xml:system/etc/UserPolicy.xml
+
+# ramdisk
+PRODUCT_COPY_FILES += \
+    device/alcatel/cocktail/ramdisk/init.rc:root/init.rc\
+    device/alcatel/cocktail/ramdisk/init.qcom.sh:root/init.qcom.sh\
+    device/alcatel/cocktail/ramdisk/init.target.rc:root/init.target.rc\
+    device/alcatel/cocktail/ramdisk/init.qcom.usb.sh:root/init.qcom.usb.sh \
+    device/alcatel/cocktail/ramdisk/init.qcom.ril.path.sh:root/init.qcom.ril.path.sh \
+    device/alcatel/cocktail/ramdisk/init.cocktail.usb.rc:root/init.cocktail.usb.rc \
+    device/alcatel/cocktail/ramdisk/init.cocktail.rc:root/init.cocktail.rc \
+    device/alcatel/cocktail/ramdisk/ueventd.cocktail.rc:root/ueventd.cocktail.rc
 
 # vold
 PRODUCT_COPY_FILES += \
@@ -25,9 +34,10 @@ PRODUCT_COPY_FILES += \
 
 # Input config
 PRODUCT_COPY_FILES += \
-    device/alcatel/cocktail/ft5306_ts.idc:system/usr/idc/ft5306_ts.idc \
-    device/alcatel/cocktail/ft5306_ts.kcm:system/usr/keychars/ft5306_ts.kcm \
-    device/alcatel/cocktail/ft5306_ts.kl:system/usr/keylayout/ft5306_ts.kl \
+    device/alcatel/cocktail/proprietary/etc/firmware/cyttsp_7630_fluid.hex:/system/etc/firmware/cyttsp_7630_fluid.hex \
+    device/alcatel/cocktail/keyfiles/ft5306_ts.kcm:system/usr/keychars/surf_keypad.kcm \
+    device/alcatel/cocktail/keyfiles/ft5306_ts.kl:system/usr/keylayout/ft5306_ts.kl \
+    device/alcatel/cocktail/keyfiles/ft5306_ts.idc:system/usr/idc/ft5306_ts.idc
 
 # apn fix
 PRODUCT_COPY_FILES += \
@@ -36,29 +46,19 @@ PRODUCT_COPY_FILES += \
 
 # Media codecs & audio policy
 PRODUCT_COPY_FILES += \
-    device/alcatel/cocktail/media_codecs.xml:system/etc/media_codecs.xml \
-    device/alcatel/cocktail/media_profiles.xml:system/etc/media_profiles.xml \
-    device/alcatel/cocktail/audio_policy.conf:system/etc/audio_policy.conf
+    device/alcatel/cocktail/media_profiles.xml:system/etc/media_profiles.xml
 
-
-# CNE config
-PRODUCT_COPY_FILES += \
-   device/alcatel/cocktail/OperatorPolicy.xml:system/etc/OperatorPolicy.xml \
-   device/alcatel/cocktail/UserPolicy.xml:system/etc/UserPolicy.xml
-
-# Use HDPI phone dalvik config
-$(call inherit-product, frameworks/base/build/phone-hdpi-512-dalvik-heap.mk)
-
-# use high-density artwork where available
+# Device uses high-density artwork where available
 PRODUCT_AAPT_CONFIG := normal hdpi
 PRODUCT_AAPT_PREF_CONFIG := hdpi
 
 # Permissions
 PRODUCT_COPY_FILES += \
     frameworks/base/data/etc/android.hardware.telephony.gsm.xml:system/etc/permissions/android.hardware.telephony.gsm.xml \
-    frameworks/base/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml \
+    frameworks/base/data/etc/handheld_core_hardware.xml:system/etc/permissions/tablet_core_hardware.xml \
     frameworks/base/data/etc/android.hardware.camera.flash-autofocus.xml:system/etc/permissions/android.hardware.camera.flash-autofocus.xml \
     frameworks/base/data/etc/android.hardware.camera.front.xml:system/etc/permissions/android.hardware.camera.front.xml \
+    frameworks/base/data/etc/android.hardware.location.xml:system/etc/permissions/android.hardware.location.xml \
     frameworks/base/data/etc/android.hardware.location.gps.xml:system/etc/permissions/android.hardware.location.gps.xml \
     frameworks/base/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
     frameworks/base/data/etc/android.hardware.sensor.proximity.xml:system/etc/permissions/android.hardware.sensor.proximity.xml \
@@ -72,6 +72,10 @@ PRODUCT_COPY_FILES += \
     frameworks/base/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
     packages/wallpapers/LivePicker/android.software.live_wallpaper.xml:system/etc/permissions/android.software.live_wallpaper.xml
 
+# Bletooth
+PRODUCT_COPY_FILES += \
+    system/bluetooth/data/main.le.conf:system/etc/bluetooth/main.conf
+
 # Kernel - prebuilt for now
 ifeq ($(TARGET_PREBUILT_KERNEL),)
 	LOCAL_KERNEL := device/alcatel/cocktail/kernel
@@ -82,12 +86,17 @@ endif
 PRODUCT_COPY_FILES += \
     $(LOCAL_KERNEL):kernel
 
-
 # Additional packages
 PRODUCT_PACKAGES += \
     copybit.msm7x30 \
     gralloc.msm7x30 \
-    hwcomposer.msm7x30
+    hwcomposer.msm7x30 \
+    libgenlock \
+    libmemalloc \
+    liboverlay \
+    libQcomUI \
+    libtilerenderer \
+    libinvensense_hal
 
 # Audio
 PRODUCT_PACKAGES += \
@@ -98,24 +107,32 @@ PRODUCT_PACKAGES += \
 
 # OMX
 PRODUCT_PACKAGES += \
+    libOmxCore \
+    libOmxVenc \
     libmm-omxcore \
-    libOmxCore.so \
-    libOmxVdec.so \
-    libOmxVenc.so \
-    libstagefrighthw 
+    libdivxdrmdecrypt \
+    libOmxVdec \
+    libstagefrighthw
 
 # GPS
 PRODUCT_PACKAGES += \
-    librpc \
     gps.cocktail
 
-# Misc
+# Live Wallpapers
 PRODUCT_PACKAGES += \
-    com.android.future.usb.accessory
+    LiveWallpapers \
+    LiveWallpapersPicker \
+    VisualizationWallpapers \
+    librs_jni
 
-# Power
+# Wireless AP
 PRODUCT_PACKAGES += \
-    power.msm7x30
+    hostapd_cli \
+    hostapd
+
+# WIFIMAC
+PRODUCT_PACKAGES += \
+    wifimac
 
 # HDMI
 PRODUCT_PACKAGES += \
@@ -136,35 +153,11 @@ PRODUCT_PACKAGES += \
     make_ext4fs \
     setup_fs
 
+$(call inherit-product, frameworks/base/build/phone-hdpi-512-dalvik-heap.mk)
+$(call inherit-product, build/target/product/full_base.mk)
 
-
-PRODUCT_PROPERTY_OVERRIDES += \
-    ro.sf.lcd_density=240 \
-    ro.opengles.version=131072 \
-    wifi.interface=wlan0
-
-# System properties
-PRODUCT_PROPERTY_OVERRIDES += \
-    persist.cne.UseCne=vendor \
-    persist.cne.UseSwim=false \
-    persist.cne.bat.range.low.med=30 \
-    persist.cne.bat.range.med.high=60 \
-    persist.cne.loc.policy.op=/system/etc/OperatorPolicy.xml \
-    persist.cne.loc.policy.user=/system/etc/UserPolicy.xml \
-    persist.cne.bwbased.rat.sel=false \
-    persist.cne.snsr.based.rat.mgt=false \
-    persist.cne.bat.based.rat.mgt=false \
-    persist.cne.rat.acq.time.out=30000 \
-    persist.cne.rat.acq.retry.tout=0 \
-    persist.cne.nsrm.mode=false \
-    debug.sf.nobootanimation=1 \
-    persist.sys.shutdown.mode=hibernate \
-    persist.sys.usb.config=mass_storage
-
-
-# QCOM Display
-PRODUCT_PROPERTY_OVERRIDES += \
-    debug.sf.hw=1 \
-    debug.egl.hw=1
-
-$(call inherit-product, build/target/product/full.mk)
+PRODUCT_BUILD_PROP_OVERRIDES += BUILD_UTC_DATE=0
+PRODUCT_NAME := full_cocktail
+PRODUCT_DEVICE := cocktail
+PRODUCT_MANUFACTURER := Alcatel
+PRODUCT_MODEL := OT-995

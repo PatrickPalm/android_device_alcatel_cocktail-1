@@ -210,7 +210,7 @@ def BuildBootableImage(sourcedir, fs_config_file):
   img = tempfile.NamedTemporaryFile()
 
   if os.access(fs_config_file, os.F_OK):
-    cmd = ["mkbootfs", "-f", fs_config_file, os.path.join(sourcedir, "RAMDISK")]
+    cmd = ["mkbootfs", fs_config_file, os.path.join(sourcedir, "RAMDISK")]
   else:
     cmd = ["mkbootfs", os.path.join(sourcedir, "RAMDISK")]
   p1 = Run(cmd, stdout=subprocess.PIPE)
